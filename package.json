@@ -1,0 +1,39 @@
+{
+  "name": "just-serve",
+  "version": "1.0.0",
+  "description": "Allow REST requests",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test-watch": "jest --watch",
+    "server": "nodemon src/index.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "express": "^4.16.2",
+    "sqlite3": "^3.1.13"
+  },
+  "devDependencies": {
+    "eslint": "^4.16.0",
+    "eslint-plugin-jest": "^21.7.0",
+    "jest": "^22.1.4",
+    "nodemon": "^1.14.11",
+    "request": "^2.83.0",
+    "request-promise-native": "^1.0.5"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "testRegex": "(/test/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "testPathIgnorePatterns": [
+      "<rootDir>/dist/"
+    ],
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ]
+  }
+}

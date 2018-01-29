@@ -1,0 +1,27 @@
+{
+  "parserOptions": {
+    "ecmaVersion": 2017
+  },
+  "env": {
+    "node": true,
+    "jest/globals": true
+  },
+  "globals": {
+    "Promise": true
+  },
+  "extends": "eslint:recommended",
+  "plugins": [
+    "jest"
+  ],
+  "rules": {
+    "quotes": ["warn", "single", { "avoidEscape": true, "allowTemplateLiterals": true }],
+
+    "no-console": 0,
+
+    "block-spacing": 1,
+    "no-trailing-spaces": "error",
+    "space-before-blocks": "error",
+    "comma-spacing": "error",
+    "space-infix-ops": "warn"
+  }
+}
