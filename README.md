@@ -35,6 +35,24 @@ Build your own: `docker build -t just-serve .`
 
 Or run it via `docker-compose`: `docker-compose up`
 
+## Customize output
+
+You can add an event handler to change up the return if you want:
+
+```javascript
+const server = require('just-serve');
+
+// change up the response and returned data to your own
+// data if you want. there are events for 'request' and
+// 'request.(get|post|put|delete|options)'
+server.on('request', (req, res, doc) => {
+  res.append('X-Something', 'Value');
+  return {custom: 'doc'};
+});
+
+server.start();
+```
+
 ## Todo
 
 * Allow per-URL lookups
