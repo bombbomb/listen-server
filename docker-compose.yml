@@ -1,0 +1,8 @@
+version: '3'
+services:
+  server:
+    build: .
+    ports:
+      - "${PORT-3000}:3000"
+    environment:
+      SQLITE_DB: ${SQLITE_DB-":memory:"}

@@ -6,7 +6,8 @@
   "scripts": {
     "test": "jest",
     "test-watch": "jest --watch",
-    "server": "nodemon src/index.js"
+    "start": "node src/index.js",
+    "development": "nodemon src/index.js"
   },
   "author": "",
   "license": "MIT",

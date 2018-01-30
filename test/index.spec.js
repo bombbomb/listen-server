@@ -123,3 +123,49 @@ test('can get to / with a querystring and see it with /_/get', async (done) => {
 
   done();
 });
+
+test('events on request', async () => {
+  const eventListener = (req, res, doc) => {
+    return {something: 123};
+  };
+  const obj = {eventListener};
+
+  const spy = jest.spyOn(obj, 'eventListener');
+
+  server.on('request', obj.eventListener);
+
+  const options = {
+    uri: `http://localhost:${server.port}/?q=123`,
+    method: 'GET',
+    json: true,
+    resolveWithFullResponse: true,
+  };
+  const response = await request(options);
+
+  expect(spy).toHaveBeenCalled();
+  expect(response.statusCode).toBe(200);
+  expect(response.body.something).toBe(123);
+});
+
+test('events on request for specific method', async () => {
+  const eventListener = (req, res, doc) => {
+    return {something: 123};
+  };
+  const obj = {eventListener};
+
+  const spy = jest.spyOn(obj, 'eventListener');
+
+  server.on('request.get', obj.eventListener);
+
+  const options = {
+    uri: `http://localhost:${server.port}/?q=123`,
+    method: 'GET',
+    json: true,
+    resolveWithFullResponse: true,
+  };
+  const response = await request(options);
+
+  expect(spy).toHaveBeenCalled();
+  expect(response.statusCode).toBe(200);
+  expect(response.body.something).toBe(123);
+});
