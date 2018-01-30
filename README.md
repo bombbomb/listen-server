@@ -1,13 +1,13 @@
-#
+# listen-server
 
 A simple server that captures and allows you to inspect those via JSON.
 
-This is intended to be a layer added into a local app stack where you might not really need another application running.
+This is intended to be a layer added into a local app stack where you might not really need another application running. Could also be useful in testing scenarios.
 
 ## Install
 
 ```
-npm install --save just-serve
+npm install --save listen-server
 ```
 
 ## Usage
@@ -31,16 +31,18 @@ Environment variables:
 
 ## Docker
 
-Build your own: `docker build -t just-serve .`
+Build your own: `docker build -t listen-server .`
 
 Or run it via `docker-compose`: `docker-compose up`
+
+You should also be able to specify
 
 ## Customize output
 
 You can add an event handler to change up the return if you want:
 
 ```javascript
-const server = require('just-serve');
+const server = require('listen-server');
 
 // change up the response and returned data to your own
 // data if you want. there are events for 'request' and
