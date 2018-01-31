@@ -1,5 +1,5 @@
 {
-  "name": "listen-server",
+  "name": "@bblabs/listen-server",
   "version": "1.0.0",
   "description": "Allow REST requests",
   "main": "index.js",

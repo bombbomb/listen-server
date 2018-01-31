@@ -1,5 +1,7 @@
 # listen-server
 
+[![Build Status](https://travis-ci.com/bombbomb/listen-server.svg?token=U5j8RScQzx1HwkBzxicx&branch=master)](https://travis-ci.com/bombbomb/listen-server)
+
 A simple server that captures and allows you to inspect those via JSON.
 
 This is intended to be a layer added into a local app stack where you might not really need another application running. Could also be useful in testing scenarios.
@@ -7,7 +9,7 @@ This is intended to be a layer added into a local app stack where you might not 
 ## Install
 
 ```
-npm install --save listen-server
+npm install --save @bblabs/listen-server
 ```
 
 ## Usage
