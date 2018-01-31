@@ -112,6 +112,9 @@ class Server {
       }
 
       let doc = { status: 'success', message: 'ok' };
+      if (process.env.NODE_ENV !== 'test') {
+        console.log(`${req.method} ${req.originalUrl}`);
+      }
       doc = this.emit(`request.${req.method.toLowerCase()}`, req, res, doc);
       doc = this.emit('request', req, res, doc);
 
