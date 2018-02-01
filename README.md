@@ -22,7 +22,7 @@ node run src/index.js
 PORT=8080 node run src/index.js
 ```
 
-Then a client can make a request to that URL and it will be captured. To see what requests have been made, you can visit `http://localhost:3000/_/post` (for `POST` request for example).
+Then a client can make a request to that URL and it will be captured. To see what requests have been made, you can visit `http://localhost:3000/_/post` (for `POST` request for example). Current the requests are just stored in a in-memory Sqlite database (you can change it to a file below, if you want it to persist beyond usage).
 
 Environment variables:
 
@@ -37,7 +37,7 @@ Build your own: `docker build -t listen-server .`
 
 Or run it via `docker-compose`: `docker-compose up`
 
-You should also be able to specify
+You should also be able to specify environment variables as well.
 
 ## Customize output
 
@@ -59,7 +59,7 @@ server.start();
 
 ## Todo
 
-* Allow per-URL lookups
+* Allow per-URL lookups and other filter options
 * Add pagination to the lookup endpoints
-* Add an "all" lookup endpoint
+* Add an "all" lookup endpoint that allows you to see all request types
 * Make DB layer abstracted
