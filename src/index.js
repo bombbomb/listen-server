@@ -116,7 +116,9 @@ class Server {
         console.log(`${req.method} ${req.originalUrl}`);
       }
       doc = this.emit(`request.${req.method.toLowerCase()}`, req, res, doc);
-      doc = this.emit('request', req, res, doc);
+      if (doc) {
+        doc = this.emit('request', req, res, doc);
+      }
 
       if (doc) {
         res.status(200).json(doc);
