@@ -1,6 +1,6 @@
 {
   "name": "@bblabs/listen-server",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Allow REST requests",
   "main": "src/index.js",
   "scripts": {
