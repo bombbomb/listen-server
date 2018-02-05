@@ -44,7 +44,7 @@ You should also be able to specify environment variables as well.
 You can add an event handler to change up the return if you want:
 
 ```javascript
-const server = require('listen-server');
+const server = require('@bblabs/listen-server');
 
 // change up the response and returned data to your own
 // data if you want. there are events for 'request' and
