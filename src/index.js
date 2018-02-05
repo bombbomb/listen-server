@@ -118,7 +118,9 @@ class Server {
       doc = this.emit(`request.${req.method.toLowerCase()}`, req, res, doc);
       doc = this.emit('request', req, res, doc);
 
-      res.status(200).json(doc);
+      if (doc) {
+        res.status(200).json(doc);
+      }
     });
   }
 
