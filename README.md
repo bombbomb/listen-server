@@ -57,6 +57,8 @@ server.on('request', (req, res, doc) => {
 server.start();
 ```
 
+Event handlers need to return a value, which will then be returned as JSON. If `false` is returned, then the event handlers will stop after this call, so you can use this to send your own custom, non-JSON values via the `res` object.
+
 ## Todo
 
 * Allow per-URL lookups and other filter options

@@ -13,6 +13,10 @@ class Server {
     this.server = null;
     this.init();
     this._events = {};
+
+    this.options = {
+      log: process.env.NODE_ENV !== 'test'
+    };
   }
 
   /**
@@ -56,11 +60,26 @@ class Server {
       this.app.get(`/_/${endpoint}`, this.lookup(endpoint).bind(this));
     });
 
+    // allow users to delete all messages
+    this.app.delete('/_', (req, res) => {
+      httpMethods.forEach((method) => {
+        this.db.run(`DELETE FROM http_${method}`);
+      });
+      res.status(200).json({ status: 'success', message: 'All requests cleared'});
+    });
+
+    httpMethods.forEach((method) => {
+      this.app.delete(`/_/${method}`, (req, res) => {
+        this.db.run(`DELETE FROM http_${method}`);
+        res.status(200).json({ status: 'success', message: 'All requests cleared' });
+      });
+    });
+
     this.app.get('/_/health-check', (req, res) => {
       res.status(200).json({ status: 'success', message: 'Hi' });
     });
 
-    // catch "all" route
+    // catch "all" route (except, routes like /_)
     this.app.all(/^[^_]/, this.catchall.bind(this));
   }
 
@@ -112,8 +131,8 @@ class Server {
       }
 
       let doc = { status: 'success', message: 'ok' };
-      if (process.env.NODE_ENV !== 'test') {
-        console.log(`${req.method} ${req.originalUrl}`);
+      if (this.options.log) {
+        console.log(`${req.method} ${req.originalUrl}`, JSON.stringify(req.body, 4));
       }
       doc = this.emit(`request.${req.method.toLowerCase()}`, req, res, doc);
       if (doc) {
@@ -172,8 +191,10 @@ class Server {
     if (typeof this._events[eventName] !== 'undefined') {
       for (let i = 0, len = this._events[eventName].length; i < len; i += 1) {
         const returnValue = this._events[eventName][i].call(this, req, res, doc);
-        if (returnValue) {
-          doc = returnValue;
+        doc = returnValue;
+
+        if (doc === false) {
+          break;
         }
       }
     }
@@ -186,6 +207,10 @@ class Server {
     }
 
     this._events[eventName].push(callback);
+  }
+
+  removeEventHandlers() {
+    this._events = [];
   }
 }
 
