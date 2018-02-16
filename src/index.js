@@ -132,7 +132,7 @@ class Server {
 
       let doc = { status: 'success', message: 'ok' };
       if (this.options.log) {
-        console.log(`${req.method} ${req.originalUrl}`, JSON.stringify(req.body, 4));
+        console.log(`${req.ip} ${new Date().toISOString()} ${req.method} ${req.originalUrl}`, { body: req.body, headers: req.headers });
       }
       doc = this.emit(`request.${req.method.toLowerCase()}`, req, res, doc);
       if (doc) {

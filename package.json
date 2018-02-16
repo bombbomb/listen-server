@@ -8,7 +8,8 @@
     "test-watch": "jest --watch",
     "start": "node src/index.js",
     "development": "nodemon src/index.js",
-    "build": "docker build -t listen-server ."
+    "build": "docker build -t listen-server .",
+    "preversion": "npm test"
   },
   "author": "",
   "license": "MIT",
