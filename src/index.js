@@ -1,4 +1,6 @@
 const bodyParser = require('body-parser');
+const moment = require('moment');
+
 const httpMethods = ['POST', 'GET', 'PUT', 'OPTIONS', 'DELETE'];
 
 /**
@@ -98,6 +100,26 @@ class Server {
         if (req.query.path) {
           this.where('url', req.query.path);
         }
+
+        if (req.query.before) {
+          try {
+            const d = moment(req.query.before);
+            this.where('timestamp', '<', d.format('x'));
+          }
+          catch (err) {
+            throw new Error(`Invalid date: ${req.query.before}`);
+          }
+        }
+
+        if (req.query.after) {
+          try {
+            const d = moment(req.query.after);
+            this.where('timestamp', '>', d.format('x'));
+          }
+          catch (err) {
+            throw new Error(`Invalid date: ${req.query.after}`);
+          }
+        }
       });
   }
 
@@ -110,6 +132,7 @@ class Server {
     return (req, res) => {
       this.buildLookupQuery(endpoint, req)
         .then((rows) => {
+
           const data = {
             status: 'success',
             message: 'ok',
@@ -146,7 +169,7 @@ class Server {
     const tableName = this.getTableName(req.method);
     const data = (req.body) ? JSON.stringify(req.body) : {};
     const qs = (req.query) ? JSON.stringify(req.query) : {};
-    this.db(tableName).insert({ url: req.originalUrl, data, headers: req.headers, queryString: qs, timestamp: new Date()})
+    this.db(tableName).insert({ url: req.originalUrl, data, headers: req.headers, queryString: qs, timestamp: moment().format('x')})
       .then(() => {
         let doc = { status: 'success', message: 'ok' };
         if (this.options.log) {

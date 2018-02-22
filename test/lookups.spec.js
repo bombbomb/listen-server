@@ -1,4 +1,5 @@
 const request = require('request-promise-native');
+const moment = require('moment');
 
 const server = require('../src/index');
 
@@ -7,6 +8,9 @@ function getRandomInt(min, max) {
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min)) + min; //The maximum is exclusive and the minimum is inclusive
 }
+process.on('unhandledRejection', (err) => {
+  console.error(err);
+});
 
 beforeAll(async () => {
   let attempts = 10;
@@ -130,15 +134,115 @@ test('can filter posts by path on /_/post', async (done) => {
         resolveWithFullResponse: true,
         json: true
       };
-      server.db.debug(true);
       const response = await request(options);
-      server.db.debug(false);
       expect(response.statusCode).toBe(200);
       expect(response.body.status).toBe('success');
       expect(response.body.count).toBe(1);
 
       done();
     });
+});
+
+test('can filter posts before a date on /_/post', async (done) => {
+  const promises = [
+    {
+      url: '/test',
+      data: JSON.stringify({ things: 123 }),
+      headers: JSON.stringify({}),
+      queryString: JSON.stringify({}),
+      timestamp: moment('2018-01-01T10:00:00').format('x')
+    },
+    {
+      url: '/test',
+      data: JSON.stringify({ things: 123 }),
+      headers: JSON.stringify({}),
+      queryString: JSON.stringify({}),
+      timestamp: moment('2018-01-01T12:00:00').format('x')
+    }
+  ].map((item) => server.db('http_post').insert(item));
+
+  Promise.all(promises)
+    .then(async () => {
+      try {
+        const rows = await server.db('http_post').select();
+        expect(rows).toHaveLength(2);
+      }
+      catch (selectError) {
+        console.error('error selecting rows', selectError);
+      }
+
+      const options = {
+        uri: `http://localhost:${server.port}/_/post?before=2018-01-01T11:59:00`,
+        resolveWithFullResponse: true,
+        json: true
+      };
+      // server.db.debug(true);
+      let response = null;
+      try {
+        response = await request(options);
+      }
+      catch (requestError) {
+        console.error('error with lookup', requestError);
+      }
+
+      // server.db.debug(false);
+      expect(response.statusCode).toBe(200);
+      expect(response.body.status).toBe('success');
+      expect(response.body.count).toBe(1);
+
+      done();
+    }, done);
+});
+
+test('can filter posts after a date on /_/post', async (done) => {
+  const promises = [
+    {
+      url: '/test',
+      data: JSON.stringify({ things: 123 }),
+      headers: JSON.stringify({}),
+      queryString: JSON.stringify({}),
+      timestamp: moment('2018-01-01T10:00:00').format('x')
+    },
+    {
+      url: '/test',
+      data: JSON.stringify({ things: 123 }),
+      headers: JSON.stringify({}),
+      queryString: JSON.stringify({}),
+      timestamp: moment('2018-01-01T12:00:00').format('x')
+    }
+  ].map((item) => server.db('http_post').insert(item));
+
+  Promise.all(promises)
+    .then(async () => {
+      try {
+        const rows = await server.db('http_post').select();
+        expect(rows).toHaveLength(2);
+      }
+      catch (selectError) {
+        console.error('error selecting rows', selectError);
+      }
+
+      const options = {
+        uri: `http://localhost:${server.port}/_/post?after=2018-01-01T11:59:00`,
+        resolveWithFullResponse: true,
+        json: true
+      };
+      // server.db.debug(true);
+      let response = null;
+      try {
+        response = await request(options);
+      }
+      catch (requestError) {
+        console.error('error with lookup', requestError);
+      }
+
+      // server.db.debug(false);
+      expect(response.statusCode).toBe(200);
+      expect(response.body.status).toBe('success');
+      expect(response.body.count).toBe(1);
+
+      done();
+    }, done);
 });
 
 test('can get to / with a querystring and see it with /_/get', async (done) => {

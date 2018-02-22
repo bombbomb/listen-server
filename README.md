@@ -59,6 +59,20 @@ server.start();
 
 Event handlers need to return a value, which will then be returned as JSON. If `false` is returned, then the event handlers will stop after this call, so you can use this to send your own custom, non-JSON values via the `res` object.
 
+## View captured data
+
+You can view data that has been captured by navigating to the `/_/METHOD` endpoint. You can also apply fileters. For example, you can view post requests to `/contact/` with:
+
+```
+curl http://localhost:3000/_/post?path=/contact
+```
+
+Available filters:
+
+* `path`: filter for paths that exactly match
+* `after`: filter for messages after a date
+* `before`: filter for messages before a date
+
 ## Todo
 
 * Allow per-URL lookups and other filter options
