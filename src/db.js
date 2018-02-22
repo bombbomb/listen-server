@@ -3,7 +3,8 @@ const connection = process.env.SQLITE_DB ? { filename: process.env.SQLITE_DB } :
 const knex = require('knex')({
   client: 'sqlite3',
   useNullAsDefault: true,
-  connection
+  connection,
+  // debug: true
 });
 
 module.exports = knex;

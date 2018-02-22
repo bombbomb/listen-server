@@ -96,24 +96,9 @@ class Server {
     return this.db(`http_${endpoint}`).select()
       .where(function() {
         if (req.query.path) {
-          this.where('path', req.query.path);
+          this.where('url', req.query.path);
         }
-      })
-      ;
-    // let query = `SELECT * FROM http_${endpoint}`;
-    // const where = [];
-    // if (req.query.path) {
-    //   where.push(['path=?', req.query.path]);
-    // }
-
-    // if (where) {
-    //   query = `${query} WHERE `;
-    //   // where.forEach((item) => {
-
-    //   // });
-    // }
-
-    // return query;
+      });
   }
 
   /**
@@ -140,7 +125,7 @@ class Server {
           res.status(200).json(data);
         })
         .catch((err) => {
-          res.status(500).json({ status: 'error', message: err });
+          res.status(500).json({ status: 'error', message: err.message });
         });
     };
   }
@@ -213,8 +198,8 @@ class Server {
     const self = this;
     return new Promise(async (resolve, reject) => {
       try {
+        await self.db.destroy();
         self.server.close(() => {
-          console.log('closed', self.server.listening);
           self.server.unref();
           resolve();
         });

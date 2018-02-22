@@ -130,7 +130,9 @@ test('can filter posts by path on /_/post', async (done) => {
         resolveWithFullResponse: true,
         json: true
       };
+      server.db.debug(true);
       const response = await request(options);
+      server.db.debug(false);
       expect(response.statusCode).toBe(200);
       expect(response.body.status).toBe('success');
       expect(response.body.count).toBe(1);

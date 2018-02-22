@@ -8,12 +8,11 @@ test('Server starts and stops', async () => {
   const server = require('../src/index');
   let attempts = 10;
   let started = false;
-  let listener = null;
   while (attempts > 0) {
     const port = getRandomInt(8000, 8999);
     attempts -= 1;
     try {
-      listener = await server.start(port);
+      await server.start(port);
       started = true;
     }
     catch (err) {
@@ -30,6 +29,5 @@ test('Server starts and stops', async () => {
   expect(server.server.listening).toBeTruthy();
 
   await server.stop();
-  expect(true).toBe(true);
-  console.log(listener);
+  expect(server.server.listening).toBeFalsy();
 });
