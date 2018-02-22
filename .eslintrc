@@ -16,11 +16,13 @@
   "rules": {
     "quotes": ["warn", "single", { "avoidEscape": true, "allowTemplateLiterals": true }],
     "indent": ["error", 2],
+    "semi": "error",
     "no-console": 0,
     "block-spacing": 1,
     "no-trailing-spaces": "error",
     "space-before-blocks": "error",
     "comma-spacing": "error",
-    "space-infix-ops": "warn"
+    "space-infix-ops": "warn",
+    "prefer-const": "error"
   }
 }

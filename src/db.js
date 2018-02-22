@@ -1,3 +1,9 @@
-const sqlite3 = require('sqlite3');
+const connection = process.env.SQLITE_DB ? { filename: process.env.SQLITE_DB } : ':memory:';
 
-module.exports = new sqlite3.Database(process.env.SQLITE_DB || ':memory:');
+const knex = require('knex')({
+  client: 'sqlite3',
+  useNullAsDefault: true,
+  connection
+});
+
+module.exports = knex;

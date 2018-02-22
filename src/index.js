@@ -36,12 +36,15 @@ class Server {
     httpMethods.forEach((method) => {
       const tableName = this.getTableName(method);
       promises.push(new Promise((resolve, reject) => {
-        this.db.run(`CREATE TABLE ${tableName} (url TEXT, data TEXT, headers TEXT, queryString TEXT, requestTime INT)`, (err) => {
-          if (err) {
-            return reject(err);
-          }
-          return resolve();
-        });
+        this.db.schema.createTable(tableName, (table) => {
+          table.text('url');
+          table.text('data');
+          table.text('headers');
+          table.text('queryString');
+          table.integer('timestamp');
+        })
+          .then(resolve)
+          .catch(reject);
       }));
     });
 
@@ -62,16 +65,22 @@ class Server {
 
     // allow users to delete all messages
     this.app.delete('/_', (req, res) => {
+      const promises = [];
       httpMethods.forEach((method) => {
-        this.db.run(`DELETE FROM http_${method}`);
+        promises.push(this.db(`http_${method}`).delete());
       });
-      res.status(200).json({ status: 'success', message: 'All requests cleared'});
+      Promise.all(promises)
+        .then(() => {
+          res.status(200).json({ status: 'success', message: 'All requests cleared'});
+        });
     });
 
     httpMethods.forEach((method) => {
       this.app.delete(`/_/${method}`, (req, res) => {
-        this.db.run(`DELETE FROM http_${method}`);
-        res.status(200).json({ status: 'success', message: 'All requests cleared' });
+        this.db(`http_${method}`).delete()
+          .then(() => {
+            res.status(200).json({ status: 'success', message: 'All requests cleared' });
+          });
       });
     });
 
@@ -83,6 +92,30 @@ class Server {
     this.app.all(/^[^_]/, this.catchall.bind(this));
   }
 
+  buildLookupQuery(endpoint, req) {
+    return this.db(`http_${endpoint}`).select()
+      .where(function() {
+        if (req.query.path) {
+          this.where('path', req.query.path);
+        }
+      })
+      ;
+    // let query = `SELECT * FROM http_${endpoint}`;
+    // const where = [];
+    // if (req.query.path) {
+    //   where.push(['path=?', req.query.path]);
+    // }
+
+    // if (where) {
+    //   query = `${query} WHERE `;
+    //   // where.forEach((item) => {
+
+    //   // });
+    // }
+
+    // return query;
+  }
+
   /**
    * The lookup handler.
    *
@@ -90,22 +123,25 @@ class Server {
    */
   lookup(endpoint) {
     return (req, res) => {
-      const items = [];
-      this.db.each(`SELECT * FROM http_${endpoint}`, (err, row) => {
-        if (err) {
-          res.status(500).json({ status: 'error', message: err });
-        }
+      this.buildLookupQuery(endpoint, req)
+        .then((rows) => {
+          const data = {
+            status: 'success',
+            message: 'ok',
+            count: 0,
+            items: []
+          };
+          rows.forEach((row) => {
+            const item = Object.assign({}, row, { data: JSON.parse(row.data) });
+            data.items.push(item);
+            data.count += 1;
+          });
 
-        const item = Object.assign({}, row, { data: JSON.parse(row.data) });
-        items.push(item);
-      }, () => {
-        res.status(200).json({
-          status: 'success',
-          message: 'ok',
-          count: items.length,
-          items
+          res.status(200).json(data);
+        })
+        .catch((err) => {
+          res.status(500).json({ status: 'error', message: err });
         });
-      });
     };
   }
 
@@ -125,24 +161,24 @@ class Server {
     const tableName = this.getTableName(req.method);
     const data = (req.body) ? JSON.stringify(req.body) : {};
     const qs = (req.query) ? JSON.stringify(req.query) : {};
-    this.db.run(`INSERT INTO ${tableName} VALUES(?, ?, ?, ?, ?)`, [req.originalUrl, data, req.headers, qs, new Date()], (err) => {
-      if (err) {
+    this.db(tableName).insert({ url: req.originalUrl, data, headers: req.headers, queryString: qs, timestamp: new Date()})
+      .then(() => {
+        let doc = { status: 'success', message: 'ok' };
+        if (this.options.log) {
+          console.log(`${req.ip} ${new Date().toISOString()} ${req.method} ${req.originalUrl}`, { body: req.body, headers: req.headers });
+        }
+        doc = this.emit(`request.${req.method.toLowerCase()}`, req, res, doc);
+        if (doc) {
+          doc = this.emit('request', req, res, doc);
+        }
+
+        if (doc) {
+          res.status(200).json(doc);
+        }
+      })
+      .catch((err) => {
         return res.status(500).json({ status: 'error', message: String(err), error: err });
-      }
-
-      let doc = { status: 'success', message: 'ok' };
-      if (this.options.log) {
-        console.log(`${req.ip} ${new Date().toISOString()} ${req.method} ${req.originalUrl}`, { body: req.body, headers: req.headers });
-      }
-      doc = this.emit(`request.${req.method.toLowerCase()}`, req, res, doc);
-      if (doc) {
-        doc = this.emit('request', req, res, doc);
-      }
-
-      if (doc) {
-        res.status(200).json(doc);
-      }
-    });
+      });
   }
 
   /**
@@ -167,7 +203,7 @@ class Server {
         resolve(server);
         self.server = server;
       });
-    })
+    });
   }
 
   /**
@@ -177,9 +213,11 @@ class Server {
     const self = this;
     return new Promise(async (resolve, reject) => {
       try {
-        await self.server.close();
-        await self.db.close();
-        resolve();
+        self.server.close(() => {
+          console.log('closed', self.server.listening);
+          self.server.unref();
+          resolve();
+        });
       }
       catch (err) {
         reject(err);

@@ -12,7 +12,7 @@ beforeAll(async () => {
   let attempts = 10;
   let started = false;
   while (attempts > 0) {
-    let port = getRandomInt(8000, 8999);
+    const port = getRandomInt(8000, 8999);
     attempts -= 1;
     try {
       await server.start(port);
@@ -30,17 +30,21 @@ beforeAll(async () => {
 });
 
 afterEach(() => {
-  server.db.run('DELETE FROM http_post');
-  server.db.run('DELETE FROM http_get');
-  server.db.run('DELETE FROM http_put');
-  server.db.run('DELETE FROM http_delete');
-  server.db.run('DELETE FROM http_options');
+  const promises = [];
+  promises.push(server.db('http_post').delete());
+  promises.push(server.db('http_get').delete());
+  promises.push(server.db('http_put').delete());
+  promises.push(server.db('http_delete').delete());
+  promises.push(server.db('http_options').delete());
+
   server.removeEventHandlers();
   server.options.log = false;
+
+  return Promise.all(promises);
 });
 
 afterAll(() => {
-  server.stop();
+  return server.stop();
 });
 
 test('can post to /', async (done) => {
@@ -52,13 +56,11 @@ test('can post to /', async (done) => {
     resolveWithFullResponse: true,
   };
   const response = await request(options);
-
   expect(response.statusCode).toBe(200);
   expect(response.body.status).toBe('success');
 
   done();
 });
-
 
 test('events on request', async () => {
   const eventListener = (req, res, doc) => {
