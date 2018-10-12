@@ -57,6 +57,7 @@ class Server {
    * Initialize the express app side of things
    */
   init() {
+    this.app.use(bodyParser.urlencoded({ extended: false }));
     this.app.use(bodyParser.json());
 
     // data inspection routes
