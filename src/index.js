@@ -34,7 +34,7 @@ class Server {
    */
   async initDb() {
     const promises = [];
-    // db initalization
+    // db initialization
     httpMethods.forEach((method) => {
       const tableName = this.getTableName(method);
       promises.push(new Promise((resolve, reject) => {
@@ -170,6 +170,7 @@ class Server {
     const tableName = this.getTableName(req.method);
     const data = (req.body) ? JSON.stringify(req.body) : {};
     const qs = (req.query) ? JSON.stringify(req.query) : {};
+
     this.db(tableName).insert({ url: req.originalUrl, data, headers: req.headers, queryString: qs, timestamp: moment().format('x')})
       .then(() => {
         let doc = { status: 'success', message: 'ok' };
@@ -264,7 +265,7 @@ class Server {
 module.exports = new Server();
 
 if (require.main === module) {
-  module.exports.start(3000)
+  module.exports.start(process.env.PORT || 3000)
     .then(() => {
       console.log('running');
     })
